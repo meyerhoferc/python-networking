@@ -23,6 +23,7 @@ def main():
     if not len(sys.argv[1:]):
         usage()
 
+    # read in command line options
     try:
         opts, args = getopt.getopt(sys.argv[1:], "hle:t:p:cu", ["help", "listen", "execute", "target", "port", "command", "upload"])
     except getopt.GetoptError as err:
@@ -47,10 +48,14 @@ def main():
         else:
             assert False, "Unhandled Option"
 
+    # client action
     if not listen and len(target) and port > 0:
+
+        # read in buffer from the command line
         buffer = sys.stdin.read()
         client_sender(buffer)
 
+    # server action
     if listen: server_loop()
 
 def usage():
@@ -116,6 +121,7 @@ def server_loop():
     while True:
         client_socket, address = server.accept()
 
+        # spin off a thread to handle our new client
         client_thread = threading.Thread(target=client_handler, args=(client_socket,))
         client_thread.start()
 
@@ -123,6 +129,7 @@ def run_command(command):
     command = command.rstrip()
 
     try:
+        # sends command for processing to OS, returns output or error
         output = subprocess.check_output(command, stderr=subprocess.STDOUT, shell=True)
     except:
         output = "Failed to execute command.\r\n"
@@ -139,10 +146,8 @@ def client_handler(client_socket):
 
         while True:
             data = client_socket.recv(1024)
-            if not data:
-                break
-            else:
-                file_buffer += data
+            if not data: break
+            else: file_buffer += data
 
         try:
             file_descriptor = open(upload_destination, "wb")
