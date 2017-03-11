@@ -70,7 +70,7 @@ def usage():
     print "echo 'ABCDEFG' | ./netfluff.py -t 192.168.11.12 -p 135"
     sys.exit(0)
 
-def send_client(buffer):
+def client_sender(buffer):
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     try:
