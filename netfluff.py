@@ -126,5 +126,38 @@ def run_command():
 
     return output
 
+def client_handler(client_socket):
+    global upload
+    global execute
+    global command
+
+    if len(upload_destination):
+        file_buffer = ""
+
+        while True:
+            data = client_socket.recv(1024)
+            if not data: break
+            else: file_buffer += data
+
+        try:
+            file_descriptor = open(upload_destination, "wb")
+            file_descriptor.write(file_buffer)
+            file_descriptor.close()
+        except:
+            client_sockeet.send("Failed to save file %s\r\n" % upload_destination)
+
+    if len(execute):
+        output = run_command(execute)
+        client_socket.send(output)
+
+    if command:
+        while True:
+            client_socket.send("<NetFluff:#> ")
+            cmd_buffer = ""
+            while "\n" not in cmd_buffer:
+                cmd_buffer += client_socket.recv(1024)
+
+            response = run_command(cmd_buffer)
+            client_socket.send(response)
 
 main()
