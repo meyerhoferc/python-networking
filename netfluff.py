@@ -74,7 +74,7 @@ def client_sender(buffer):
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     try:
-        client.connect(target, port)
+        client.connect((target, port))
 
         if len(buffer):
             client.send(buffer)
@@ -86,11 +86,13 @@ def client_sender(buffer):
             while recv_len:
                 data = client.recv(4096)
                 recv_len = len(data)
-                response += data
+                response+= data
 
-                if recv_len < 4096: break
+                if recv_len < 4096:
+                    break
 
             print response,
+
             buffer = raw_input("")
             buffer += "\n"
 
@@ -101,6 +103,7 @@ def client_sender(buffer):
 
 def server_loop():
     global target
+    global port
 
     if not len(target):
         target = "0.0.0.0"
@@ -136,15 +139,17 @@ def client_handler(client_socket):
 
         while True:
             data = client_socket.recv(1024)
-            if not data: break
-            else: file_buffer += data
+            if not data:
+                break
+            else:
+                file_buffer += data
 
         try:
             file_descriptor = open(upload_destination, "wb")
             file_descriptor.write(file_buffer)
             file_descriptor.close()
         except:
-            client_sockeet.send("Failed to save file %s\r\n" % upload_destination)
+            client_socket.send("Failed to save file %s\r\n" % upload_destination)
 
     if len(execute):
         output = run_command(execute)
